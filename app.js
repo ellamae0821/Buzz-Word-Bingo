@@ -9,6 +9,7 @@ let buzzWordObj = {"buzzWords": buzzWordsArray };
 var bodyParser = require('body-parser');
 
 app.use(express.static('public'));
+app.use(bodyParser.urlencoded({ extended: false }));
 
 app.get('/', (req, res) => {
   res.sendFile(__dirname + './public/index');
@@ -16,83 +17,52 @@ app.get('/', (req, res) => {
 
 
 app.get('/buzzwords', (req, res) => {
-  res.json(buzzWordObj);
+  res.json(buzzWordsArray);
 });
 
 
-/*app.post('/buzzword', (req, res) => {
-  let buzzword = req.body;
-  console.log(req.body);
-  if(checkAvailability(req.body.buzzWords.buzzWordsArray, buzzword)){
-    req.body.heard = false;
-    req.body.score = Number(req.body.score);
-    buzzWordObj.buzzWords.buzzWordsArray.push(req.body.buzzWord);
-    res.json({success: true});
-  }else{
-    res.status(400).end('Error: Word already heard');
+
+app.post('/buzzword', ( req, res ) => {
+  buzzWordsArray.push(req.body);
+  console.log("buzzWordsArray : ", buzzWordsArray);
+  req.body.heard = false;
+  req.body.points = Number(req.body.points);
+  res.json( { "success": true } );
+  console.log(buzzWordsArray.length);
+});
+
+
+let totalScore = 0;
+
+app.put('/buzzword', (req, res) => {
+  for (let i=0; i< buzzWordsArray.length; i++){
+    if(req.body.buzzWord === buzzWordsArray[i].buzzWord){
+      console.log('buzzWordsArray[i]: ',buzzWordsArray[i].buzzWord);
+      buzzWordsArray[i].heard = req.body.heard;
+      totalScore += buzzWordsArray[i].points;
+      res.send( `Yeay! Word has been heard \n Total Score: ${totalScore}` );
+    }
   }
-});*/
-
-function checkAvailability(arr, val){
-  return arr.some(function(arrVal){
-    return val === arrVal;
-  });
-}
-
-/*function checkPost (body) {
-  let checkAvailability = buzzWordObj.buzzWords.some((element) => element.buzzword === body.buzzword);
-  return body.hasOwnProperty('buzzword') && body.hasOwnProperty('score') && !checkAvailability;
-}*/
-
-/*// POST user[name]=tobi&user[email]=tobi@learnboost.com
-req.body.user.name
-// => "tobi"
-
-req.body.user.email
-// => "tobi@learnboost.com"
-
-// POST { "name": "tobi" }
-req.body.name
-// => "tobi"*/
-
-
-
-/*app.put('/buzzword', (req, res) => {
-
+  res.send("Try again, next word!" );
 });
+
+
 
 app.delete('/buzzword', (req, res) => {
-
+  for (let i=0; i< buzzWordsArray.length; i++){
+    if(req.body.buzzWord === buzzWordsArray[i].buzzWord){
+      buzzWordsArray.splice(i, 1);
+      res.json( { "success": true } );
+    }
+  }
 });
 
 
-app.reset('/reset', (req, res) => {
-
+app.post('/reset', (req, res) => {
+  totalScore = 0;
+  buzzWordsArray = [];
+  res.json( { "success": true } );
 });
-
-
-const checkPostBody = (bodyObj) => {
-let duplicateCheck = buzzwordsJSON.buzzwords.some((element) => element.buzzword === bodyObj.buzzword);
-return bodyObj.hasOwnProperty('buzzword') && bodyObj.hasOwnProperty('points') && !duplicateCheck;
-};
-
-.post((req, res) => {
-if(checkPostBody(req.body)) {
-req.body.heard = false;
-req.body.points = Number(req.body.points);
-buzzwordsJSON.buzzwords.push(req.body);
-res.json({success: true});
-} else {
-res.status(400).end('Invalid or Duplicate Object');
-}
-})
-
-
-
-//////////////////
-
-*/
-
 
 
 
